@@ -835,19 +835,19 @@ static BOOL SDImageIOPNGPluginBuggyNeedWorkaround(void) {
     NSCParameterAssert(_incremental);
     UIImage *image;
     
+    // Create the image
+    CGFloat scale = _scale;
+    NSNumber *scaleFactor = options[SDImageCoderDecodeScaleFactor];
+    if (scaleFactor != nil) {
+        scale = MAX([scaleFactor doubleValue], 1);
+    }
+    SD_LOCK(_lock);
     if (_width + _height > 0) {
-        // Create the image
-        CGFloat scale = _scale;
-        NSNumber *scaleFactor = options[SDImageCoderDecodeScaleFactor];
-        if (scaleFactor != nil) {
-            scale = MAX([scaleFactor doubleValue], 1);
-        }
-        SD_LOCK(_lock);
         image = [self.class createFrameAtIndex:0 source:_imageSource scale:scale preserveAspectRatio:_preserveAspectRatio thumbnailSize:_thumbnailSize lazyDecode:_lazyDecode animatedImage:NO decodeToHDR:_finished ? _decodeToHDR : NO];
-        SD_UNLOCK(_lock);
-        if (image) {
-            image.sd_imageFormat = self.class.imageFormat;
-        }
+    }
+    SD_UNLOCK(_lock);
+    if (image) {
+        image.sd_imageFormat = self.class.imageFormat;
     }
     
     return image;
